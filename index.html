@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La Mia Rassegna Stampa</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a18;
+    --paper: #f4f0e8;
+    --paper2: #ede9df;
+    --accent: #c0392b;
+    --accent2: #2c5f8a;
+    --muted: #7a7060;
+    --rule: #c8bfa8;
+    --morning: #e8a835;
+    --afternoon: #2c5f8a;
+    --evening: #3d2b5e;
+    --success: #2d6a4f;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* MASTHEAD */
+  .masthead {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 0;
+    text-align: center;
+    border-bottom: 4px solid var(--accent);
+  }
+
+  .masthead-top {
+    padding: 8px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #444;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: #aaa;
+  }
+
+  .masthead-settings-btn {
+    background: none;
+    border: 1px solid #555;
+    color: #aaa;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    padding: 4px 10px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+  .masthead-settings-btn:hover { border-color: var(--paper); color: var(--paper); }
+
+  .masthead h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 6vw, 4.5rem);
+    font-weight: 700;
+    letter-spacing: -1px;
+    padding: 20px 24px 8px;
+    line-height: 1;
+  }
+
+  .masthead-sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: #aaa;
+    padding: 0 24px 16px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  /* EDITION TABS */
+  .edition-bar {
+    display: flex;
+    border-bottom: 2px solid var(--ink);
+    background: var(--paper2);
+    overflow-x: auto;
+  }
+
+  .edition-tab {
+    flex: 1;
+    min-width: 120px;
+    padding: 16px 20px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-right: 1px solid var(--rule);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .edition-tab:last-child { border-right: none; }
+  .edition-tab .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .edition-tab[data-edition="morning"]   .dot { background: var(--morning); }
+  .edition-tab[data-edition="afternoon"] .dot { background: var(--afternoon); }
+  .edition-tab[data-edition="evening"]   .dot { background: var(--evening); }
+
+  .edition-tab.active {
+    color: var(--ink);
+    background: var(--paper);
+    border-bottom: 3px solid var(--ink);
+    margin-bottom: -2px;
+  }
+
+  /* FILTERS BAR */
+  .filters {
+    padding: 10px 24px;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--rule);
+    background: var(--paper);
+    align-items: center;
+  }
+
+  .filter-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-right: 4px;
+  }
+
+  .filter-btn {
+    padding: 4px 10px;
+    border: 1px solid var(--rule);
+    background: transparent;
+    cursor: pointer;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--muted);
+    border-radius: 2px;
+    transition: all 0.15s;
+  }
+
+  .filter-btn.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .filter-btn:hover:not(.active) { border-color: var(--ink); color: var(--ink); }
+
+  /* MAIN */
+  .main { max-width: 960px; margin: 0 auto; padding: 32px 24px; }
+
+  .generate-section { text-align: center; padding: 48px 24px; }
+
+  .generate-btn {
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    padding: 16px 40px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .generate-btn::after {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; width: 100%; height: 100%;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+    z-index: 0;
+  }
+
+  .generate-btn:hover::after { transform: scaleX(1); }
+  .generate-btn span { position: relative; z-index: 1; }
+  .generate-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .edition-hint {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 16px;
+    letter-spacing: 1px;
+  }
+
+  /* LOADING */
+  .loading { text-align: center; padding: 64px 24px; }
+  .loading-press { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-style: italic; color: var(--muted); animation: pulse 1.5s ease-in-out infinite; }
+  .loading-dots { font-family: 'IBM Plex Mono', monospace; font-size: 24px; letter-spacing: 8px; color: var(--rule); margin-top: 16px; animation: pulse 1s ease-in-out infinite; }
+
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  /* NEWS */
+  .edition-header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 3px double var(--ink);
+  }
+
+  .edition-title { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 700; }
+  .edition-meta { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 1px; }
+
+  .news-item {
+    padding: 20px 0;
+    border-bottom: 1px solid var(--rule);
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 16px;
+    animation: fadeIn 0.4s ease forwards;
+    opacity: 0;
+  }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .news-item:nth-child(1) { animation-delay:0.05s } .news-item:nth-child(2) { animation-delay:0.1s }
+  .news-item:nth-child(3) { animation-delay:0.15s } .news-item:nth-child(4) { animation-delay:0.2s }
+  .news-item:nth-child(5) { animation-delay:0.25s } .news-item:nth-child(6) { animation-delay:0.3s }
+  .news-item:nth-child(7) { animation-delay:0.35s } .news-item:nth-child(8) { animation-delay:0.4s }
+  .news-item:nth-child(9) { animation-delay:0.45s } .news-item:nth-child(10){ animation-delay:0.5s }
+
+  .news-number { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; color: var(--rule); line-height: 1; min-width: 32px; text-align: right; }
+
+  .news-cat {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--paper);
+    background: var(--muted);
+    padding: 2px 6px;
+    display: inline-block;
+    margin-bottom: 6px;
+  }
+
+  .news-manual-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    background: var(--success);
+    color: white;
+    padding: 2px 5px;
+    margin-left: 6px;
+    letter-spacing: 1px;
+  }
+
+  .news-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; line-height: 1.3; margin-bottom: 6px; }
+  .news-summary { font-family: 'IBM Plex Sans', sans-serif; font-size: 0.875rem; color: #444; line-height: 1.6; font-weight: 300; }
+  .news-source { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); margin-top: 8px; letter-spacing: 1px; }
+  .news-source a { color: var(--accent2); text-decoration: none; }
+  .news-source a:hover { text-decoration: underline; }
+
+  .error-box { border: 2px solid var(--accent); padding: 24px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--accent); text-align: center; }
+  .empty-state { text-align: center; padding: 48px; color: var(--muted); font-family: 'Playfair Display', serif; font-style: italic; font-size: 1.1rem; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(26,26,24,0.78);
+    z-index: 1000;
+    display: flex; align-items: flex-start; justify-content: center;
+    padding: 32px 16px;
+    overflow-y: auto;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+  }
+
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+  .modal {
+    background: var(--paper);
+    border-top: 4px solid var(--ink);
+    width: 100%; max-width: 700px;
+    transform: translateY(-16px);
+    transition: transform 0.25s;
+    flex-shrink: 0;
+  }
+
+  .modal-overlay.open .modal { transform: translateY(0); }
+
+  .modal-header {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 14px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .modal-header h2 { font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 3px; text-transform: uppercase; }
+
+  .modal-close { background: none; border: none; color: var(--paper); font-size: 20px; cursor: pointer; opacity: 0.6; line-height: 1; padding: 0 4px; }
+  .modal-close:hover { opacity: 1; }
+
+  .modal-tabs { display: flex; border-bottom: 2px solid var(--ink); background: var(--paper2); }
+
+  .modal-tab {
+    flex: 1; padding: 12px;
+    border: none; background: transparent; cursor: pointer;
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: var(--muted); border-right: 1px solid var(--rule); transition: all 0.15s;
+  }
+
+  .modal-tab:last-child { border-right: none; }
+  .modal-tab.active { color: var(--ink); background: var(--paper); font-weight: 600; }
+
+  .modal-body { padding: 24px; }
+
+  .modal-panel { display: none; }
+  .modal-panel.active { display: block; }
+
+  /* Section label */
+  .section-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  /* Cat list */
+  .cat-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 28px; max-height: 260px; overflow-y: auto; }
+
+  .cat-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 8px;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--paper2);
+    border: 1px solid var(--rule);
+  }
+
+  .cat-row.editing { background: #fff8f0; border-color: var(--morning); }
+
+  .cat-row-info { display: flex; align-items: center; gap: 10px; }
+  .cat-swatch { width: 12px; height: 12px; border-radius: 1px; flex-shrink: 0; }
+  .cat-name-display { font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
+  .cat-id-display { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); }
+
+  .icon-btn { background: none; border: none; cursor: pointer; font-size: 13px; opacity: 0.45; padding: 2px 4px; transition: opacity 0.15s; line-height: 1; }
+  .icon-btn:hover { opacity: 1; }
+  .icon-btn.danger:hover { color: var(--accent); opacity: 1; }
+
+  /* Forms */
+  .add-cat-form { display: grid; grid-template-columns: 1fr 1fr auto auto; gap: 8px; margin-bottom: 6px; }
+
+  .form-input {
+    padding: 8px 10px;
+    border: 1px solid var(--rule);
+    background: var(--paper);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s;
+    width: 100%;
+  }
+
+  .form-input:focus { border-color: var(--ink); }
+  .form-input::placeholder { color: var(--muted); }
+
+  .form-select {
+    padding: 8px 10px;
+    border: 1px solid var(--rule);
+    background: var(--paper);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--ink);
+    cursor: pointer;
+    outline: none;
+  }
+
+  .add-btn {
+    padding: 8px 14px;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transition: background 0.15s;
+  }
+
+  .add-btn:hover { background: var(--success); }
+
+  .hint-text { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); margin-top: 4px; }
+
+  /* Feeds */
+  .feed-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 28px; max-height: 240px; overflow-y: auto; }
+
+  .feed-row {
+    padding: 10px 12px;
+    background: var(--paper2);
+    border: 1px solid var(--rule);
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 8px;
+    align-items: start;
+  }
+
+  .feed-name { font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 500; }
+  .feed-url  { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); margin-top: 2px; word-break: break-all; }
+  .feed-cat-badge {
+    font-family: 'IBM Plex Mono', monospace; font-size: 9px;
+    background: var(--muted); color: white; padding: 1px 5px;
+    display: inline-block; margin-top: 4px; text-transform: uppercase; letter-spacing: 1px;
+  }
+
+  .add-feed-form { display: flex; flex-direction: column; gap: 8px; }
+  .add-feed-row  { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  /* Inline edit */
+  .inline-edit { border: none; border-bottom: 1px solid var(--ink); background: transparent; outline: none; font-family: 'IBM Plex Mono', monospace; font-size: 12px; width: 100%; padding: 2px; }
+
+  .edit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; grid-column: 1; }
+
+  /* Modal footer */
+  .modal-footer {
+    padding: 14px 24px;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--paper2);
+  }
+
+  .save-btn {
+    padding: 10px 28px;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 3px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: background 0.15s;
+  }
+
+  .save-btn:hover { background: var(--success); }
+  .save-hint { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--ink); color: var(--paper);
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 1px;
+    padding: 12px 20px; z-index: 2000;
+    transform: translateY(60px); opacity: 0; transition: all 0.3s;
+  }
+
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* FOOTER */
+  footer {
+    border-top: 2px solid var(--ink);
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    margin-top: 48px;
+  }
+
+  @media (max-width: 600px) {
+    .masthead h1 { font-size: 2rem; }
+    .main { padding: 20px 16px; }
+    .edition-tab { font-size: 10px; padding: 12px 10px; }
+    .news-number { font-size: 1.4rem; min-width: 24px; }
+    .news-title { font-size: 1rem; }
+    .add-cat-form { grid-template-columns: 1fr 1fr; }
+    .add-cat-form .add-btn { grid-column: 1/-1; }
+    .add-feed-row { grid-template-columns: 1fr; }
+    .feed-row { grid-template-columns: 1fr auto; }
+    .modal-tab { font-size: 9px; padding: 10px 6px; letter-spacing: 1px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- MASTHEAD -->
+<header class="masthead">
+  <div class="masthead-top">
+    <span id="live-date">—</span>
+    <button class="masthead-settings-btn" onclick="openSettings()">⚙ Impostazioni</button>
+    <span id="live-time">—</span>
+  </div>
+  <h1>La Mia Rassegna</h1>
+  <div class="masthead-sub">Curata dall'intelligenza artificiale · Milano</div>
+</header>
+
+<!-- EDITION TABS -->
+<nav class="edition-bar">
+  <button class="edition-tab active" data-edition="morning"   onclick="switchEdition('morning')">
+    <span class="dot"></span> Mattina
+  </button>
+  <button class="edition-tab" data-edition="afternoon" onclick="switchEdition('afternoon')">
+    <span class="dot"></span> Dopo Pranzo
+  </button>
+  <button class="edition-tab" data-edition="evening"   onclick="switchEdition('evening')">
+    <span class="dot"></span> Sera
+  </button>
+</nav>
+
+<!-- FILTERS -->
+<div class="filters" id="filters-bar"></div>
+
+<!-- MAIN CONTENT -->
+<main class="main" id="main-content">
+  <div class="generate-section">
+    <button class="generate-btn" onclick="generateNews()">
+      <span>⬡ Genera Rassegna Stampa</span>
+    </button>
+    <p class="edition-hint" id="edition-hint">Edizione mattutina · notizie fresche di giornata</p>
+  </div>
+</main>
+
+<footer>
+  <span>LA MIA RASSEGNA STAMPA</span>
+  <span>POWERED BY CLAUDE AI</span>
+  <span id="footer-date">—</span>
+</footer>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>⚙ Impostazioni Rassegna</h2>
+      <button class="modal-close" onclick="closeSettings()">✕</button>
+    </div>
+
+    <div class="modal-tabs">
+      <button class="modal-tab active" onclick="switchModalTab('categories', this)">📂 Categorie</button>
+      <button class="modal-tab" onclick="switchModalTab('feeds', this)">📡 Feed & Fonti</button>
+    </div>
+
+    <div class="modal-body">
+
+      <!-- CATEGORIES PANEL -->
+      <div class="modal-panel active" id="panel-categories">
+        <span class="section-label">Categorie attive</span>
+        <div class="cat-list" id="cat-list"></div>
+
+        <span class="section-label">Aggiungi categoria</span>
+        <div class="add-cat-form">
+          <input class="form-input" id="new-cat-label" placeholder="Nome (es. Scienza)" maxlength="30">
+          <input class="form-input" id="new-cat-id"    placeholder="ID (es. scienza)"  maxlength="20">
+          <select class="form-select" id="new-cat-color">
+            <option value="#5a2d82">Viola</option>
+            <option value="#c0392b">Rosso</option>
+            <option value="#2c5f8a">Blu</option>
+            <option value="#2d6a4f">Verde</option>
+            <option value="#7b4f12">Marrone</option>
+            <option value="#1a5c5c">Teal</option>
+            <option value="#c87800">Arancio</option>
+            <option value="#4a4a4a">Grigio</option>
+          </select>
+          <button class="add-btn" onclick="addCategory()">+ Aggiungi</button>
+        </div>
+        <p class="hint-text">L'ID deve essere univoco e senza spazi. Viene usato internamente per filtrare le notizie.</p>
+      </div>
+
+      <!-- FEEDS PANEL -->
+      <div class="modal-panel" id="panel-feeds">
+        <span class="section-label">Fonti preferenziali</span>
+        <div class="feed-list" id="feed-list"></div>
+
+        <span class="section-label">Aggiungi fonte o feed RSS</span>
+        <div class="add-feed-form">
+          <div class="add-feed-row">
+            <input class="form-input" id="new-feed-name" placeholder="Nome fonte (es. Tom's Hardware IT)">
+            <input class="form-input" id="new-feed-url"  placeholder="URL o feed RSS (https://...)">
+          </div>
+          <div class="add-feed-row">
+            <select class="form-select" id="new-feed-cat"></select>
+            <button class="add-btn" onclick="addFeed()">+ Aggiungi Fonte</button>
+          </div>
+        </div>
+        <p class="hint-text">Le fonti aggiunte vengono incluse nel prompt AI come riferimento preferenziale durante la generazione della rassegna.</p>
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <span class="save-hint">✓ Modifiche salvate automaticamente nel browser</span>
+      <button class="save-btn" onclick="closeSettings()">Chiudi</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ────────────────────────────────────────────────
+// STATE
+// ────────────────────────────────────────────────
+const DEFAULT_CATS = [
+  { id:'politica', label:'Politica IT',     color:'#c0392b' },
+  { id:'esteri',   label:'Esteri',           color:'#2c5f8a' },
+  { id:'economia', label:'Economia',          color:'#7b4f12' },
+  { id:'tech',     label:'Tech & AI',         color:'#2d6a4f' },
+  { id:'gaming',   label:'Gaming',            color:'#5a2d82' },
+  { id:'iot',      label:'IoT & Smart Home',  color:'#1a5c5c' },
+  { id:'diy',      label:'DIY',               color:'#5c4a1a' },
+];
+
+function loadState() {
+  try {
+    return {
+      categories: JSON.parse(localStorage.getItem('rs_categories') || 'null') || DEFAULT_CATS,
+      feeds:      JSON.parse(localStorage.getItem('rs_feeds')      || 'null') || [],
+    };
+  } catch { return { categories: DEFAULT_CATS, feeds: [] }; }
+}
+
+function saveState() {
+  localStorage.setItem('rs_categories', JSON.stringify(state.categories));
+  localStorage.setItem('rs_feeds',      JSON.stringify(state.feeds));
+}
+
+let state         = loadState();
+let currentEdition = 'morning';
+let currentFilter  = 'all';
+let newsCache      = {};
+
+// ────────────────────────────────────────────────
+// DATE / TIME
+// ────────────────────────────────────────────────
+function updateDateTime() {
+  const now = new Date();
+  const ds  = now.toLocaleDateString('it-IT', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  const ts  = now.toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' });
+  document.getElementById('live-date').textContent   = ds;
+  document.getElementById('live-time').textContent   = ts;
+  document.getElementById('footer-date').textContent = ds;
+}
+updateDateTime();
+setInterval(updateDateTime, 60000);
+
+// ────────────────────────────────────────────────
+// FILTER BAR
+// ────────────────────────────────────────────────
+function renderFilters() {
+  const bar = document.getElementById('filters-bar');
+  const allBtn = `<button class="filter-btn ${currentFilter==='all'?'active':''}" onclick="filterCat(this,'all')">Tutto</button>`;
+  const catBtns = state.categories.map(c =>
+    `<button class="filter-btn ${currentFilter===c.id?'active':''}" onclick="filterCat(this,'${c.id}')">${c.label}</button>`
+  ).join('');
+  bar.innerHTML = `<span class="filter-label">Filtra:</span>${allBtn}${catBtns}`;
+}
+
+function filterCat(btn, cat) {
+  currentFilter = cat;
+  renderFilters();
+  if (newsCache[currentEdition]) renderNews(newsCache[currentEdition]);
+}
+
+// ────────────────────────────────────────────────
+// EDITION
+// ────────────────────────────────────────────────
+const EDITION_META = {
+  morning:   { label:'🌅 Edizione Mattutina',       hint:'notizie fresche di giornata',              count:10, tone:'conciso, informativo, senza sensazionalismo. 2-3 frasi per notizia' },
+  afternoon: { label:'☀️ Edizione del Pomeriggio',  hint:'aggiornamenti e sviluppi della mattinata', count:8,  tone:'aggiornamento rispetto ai fatti della mattina. 2-3 frasi' },
+  evening:   { label:'🌙 Edizione Serale',           hint:'il punto della giornata, analisi e approfondimenti', count:10, tone:'approfondito, con contesto e analisi. 3-4 frasi per notizia' },
+};
+
+function autoDetectEdition() {
+  const h = new Date().getHours();
+  return h < 13 ? 'morning' : h < 19 ? 'afternoon' : 'evening';
+}
+
+function switchEdition(ed, reset=true) {
+  currentEdition = ed;
+  document.querySelectorAll('.edition-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`[data-edition="${ed}"]`).classList.add('active');
+  const hint = document.getElementById('edition-hint');
+  if (hint) hint.textContent = EDITION_META[ed].hint;
+  if (reset) {
+    if (newsCache[ed]) renderNews(newsCache[ed]);
+    else showGenerateSection();
+  }
+}
+
+function showGenerateSection() {
+  document.getElementById('main-content').innerHTML = `
+    <div class="generate-section">
+      <button class="generate-btn" onclick="generateNews()">
+        <span>⬡ Genera Rassegna Stampa</span>
+      </button>
+      <p class="edition-hint">${EDITION_META[currentEdition].hint}</p>
+    </div>`;
+}
+
+// ────────────────────────────────────────────────
+// PROMPT BUILDER
+// ────────────────────────────────────────────────
+function buildPrompt(ed) {
+  const meta     = EDITION_META[ed];
+  const today    = new Date().toLocaleDateString('it-IT', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  const moment   = ed==='morning' ? 'mattina' : ed==='afternoon' ? 'pomeriggio' : 'sera';
+  const catList  = state.categories.map(c => `${c.label} (id: "${c.id}")`).join(', ');
+  const catIds   = state.categories.map(c => `"${c.id}"`).join(' | ');
+  const feedHints = state.feeds.length
+    ? `\n\nFonti preferenziali da cui attingere se disponibili online:\n${state.feeds.map(f=>`- ${f.name}: ${f.url} (categoria preferita: ${f.cat})`).join('\n')}`
+    : '';
+
+  return `Sei il curatore di una rassegna stampa italiana personalizzata per un lettore di 40 anni, appassionato e critico. È ${moment} del ${today}.
+
+Genera esattamente ${meta.count} notizie di attualità reali e recenti in italiano. Tono: ${meta.tone}. Distribuisci le notizie tra queste categorie: ${catList}.${feedHints}
+
+Per ogni notizia usa questo formato JSON (array di oggetti, nessun testo al di fuori):
+{
+  "cat": ${catIds},
+  "catLabel": "Nome leggibile della categoria",
+  "title": "Titolo incisivo come un titolo di giornale",
+  "summary": "Riassunto della notizia.",
+  "source": "Nome della fonte (es. Corriere della Sera, ANSA, Tom's Hardware, ecc.)",
+  "url": "URL diretto all'articolo se disponibile, altrimenti stringa vuota"
+}
+
+Restituisci SOLO l'array JSON. Nessun testo prima, nessun testo dopo, nessun markdown.`;
+}
+
+// ────────────────────────────────────────────────
+// GENERATE
+// ────────────────────────────────────────────────
+async function callAPI(messages) {
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 1000,
+      tools: [{ type: "web_search_20250305", name: "web_search" }],
+      messages
+    })
+  });
+  const data = await res.json();
+  let raw = '';
+  for (const b of (data.content || [])) if (b.type === 'text') raw += b.text;
+  return raw;
+}
+
+function extractJSON(raw) {
+  // Strip markdown fences
+  let cleaned = raw.trim().replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+  // Extract array
+  const s = cleaned.indexOf('['), e = cleaned.lastIndexOf(']');
+  if (s !== -1 && e !== -1) cleaned = cleaned.slice(s, e + 1);
+  return JSON.parse(cleaned);
+}
+
+async function generateNews() {
+  document.getElementById('main-content').innerHTML = `
+    <div class="loading">
+      <div class="loading-press">Interrogo le fonti...</div>
+      <div class="loading-dots">· · · · ·</div>
+    </div>`;
+
+  const userPrompt = buildPrompt(currentEdition);
+
+  try {
+    // First attempt
+    let raw = await callAPI([{ role: "user", content: userPrompt }]);
+
+    // If it doesn't look like JSON, do a correction pass
+    if (!raw.trim().startsWith('[') && raw.indexOf('[') === -1) {
+      const correctionPrompt = `La tua risposta precedente non era JSON valido. Rispondi SOLO con l'array JSON richiesto, senza nessun testo aggiuntivo, senza scuse, senza markdown. Solo il JSON grezzo che inizia con [ e finisce con ].`;
+      raw = await callAPI([
+        { role: "user",      content: userPrompt },
+        { role: "assistant", content: raw },
+        { role: "user",      content: correctionPrompt }
+      ]);
+    }
+
+    const news = extractJSON(raw);
+    if (!Array.isArray(news) || news.length === 0) throw new Error('Array vuoto o non valido');
+
+    newsCache[currentEdition] = news;
+    renderNews(news);
+
+  } catch (err) {
+    document.getElementById('main-content').innerHTML = `
+      <div class="error-box">
+        ERRORE DI STAMPA — Impossibile recuperare le notizie.<br>
+        <small style="opacity:0.7">${err.message}</small><br><br>
+        <button class="generate-btn" onclick="generateNews()" style="font-size:11px;padding:10px 24px">
+          <span>↻ Riprova</span>
+        </button>
+      </div>`;
+  }
+}
+
+function refreshNews() {
+  newsCache[currentEdition] = null;
+  generateNews();
+}
+
+// ────────────────────────────────────────────────
+// RENDER NEWS
+// ────────────────────────────────────────────────
+function getCatColor(catId) {
+  const c = state.categories.find(c => c.id === catId);
+  return c ? c.color : '#7a7060';
+}
+
+function renderNews(news) {
+  const meta     = EDITION_META[currentEdition];
+  const filtered = currentFilter === 'all' ? news : news.filter(n => n.cat === currentFilter);
+  const now      = new Date().toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' });
+
+  const items = filtered.length === 0
+    ? `<div class="empty-state">Nessuna notizia in questa categoria per l'edizione corrente.</div>`
+    : filtered.map((n, i) => {
+        const color      = getCatColor(n.cat);
+        const sourceHtml = n.url
+          ? `<a href="${n.url}" target="_blank" rel="noopener">▸ ${n.source || 'Fonte'}</a>`
+          : `▸ ${n.source || 'Fonte non specificata'}`;
+        const manualFeed = state.feeds.find(f => f.cat === n.cat);
+        const badge      = manualFeed ? `<span class="news-manual-badge">↗ ${manualFeed.name}</span>` : '';
+        return `
+        <article class="news-item" style="animation-delay:${i*0.06}s">
+          <div class="news-number">${String(i+1).padStart(2,'0')}</div>
+          <div class="news-content">
+            <div style="margin-bottom:6px">
+              <span class="news-cat" style="background:${color}">${n.catLabel || n.cat}</span>${badge}
+            </div>
+            <h2 class="news-title">${n.title}</h2>
+            <p class="news-summary">${n.summary}</p>
+            <div class="news-source">${sourceHtml}</div>
+          </div>
+        </article>`;
+      }).join('');
+
+  document.getElementById('main-content').innerHTML = `
+    <div class="edition-header">
+      <h2 class="edition-title">${meta.label}</h2>
+      <span class="edition-meta">Generata alle ${now} · ${news.length} notizie</span>
+    </div>
+    <div class="news-grid">${items}</div>
+    <div style="text-align:center;margin-top:32px;">
+      <button class="generate-btn" onclick="refreshNews()"><span>↻ Aggiorna Rassegna</span></button>
+    </div>`;
+}
+
+// ────────────────────────────────────────────────
+// MODAL
+// ────────────────────────────────────────────────
+function openSettings() {
+  renderCatList();
+  renderFeedList();
+  renderFeedCatSelect();
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeSettings() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  renderFilters();
+  // don't nuke cache on close unless user actually changed something
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('modal-overlay')) closeSettings();
+}
+
+function switchModalTab(tab, btn) {
+  document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.modal-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-' + tab).classList.add('active');
+}
+
+// ────────────────────────────────────────────────
+// CATEGORIES
+// ────────────────────────────────────────────────
+function renderCatList() {
+  const list = document.getElementById('cat-list');
+  if (!state.categories.length) {
+    list.innerHTML = `<div class="empty-state" style="padding:16px;font-size:0.85rem">Nessuna categoria. Aggiungine una.</div>`;
+    return;
+  }
+  list.innerHTML = state.categories.map((c, i) => `
+    <div class="cat-row" id="cat-row-${i}">
+      <div class="cat-row-info">
+        <div class="cat-swatch" style="background:${c.color}"></div>
+        <div>
+          <div class="cat-name-display">${c.label}</div>
+          <div class="cat-id-display">id: ${c.id}</div>
+        </div>
+      </div>
+      <button class="icon-btn" title="Rinomina" onclick="inlineEditCat(${i})">✏️</button>
+      <button class="icon-btn danger" title="Rimuovi" onclick="removeCat(${i})">✕</button>
+    </div>`).join('');
+}
+
+function inlineEditCat(i) {
+  const row = document.getElementById(`cat-row-${i}`);
+  const c   = state.categories[i];
+  row.classList.add('editing');
+  row.innerHTML = `
+    <div class="edit-grid">
+      <input class="form-input inline-edit" id="el-${i}" value="${c.label}" placeholder="Nome">
+      <input class="form-input inline-edit" id="ei-${i}" value="${c.id}"    placeholder="ID">
+    </div>
+    <button class="icon-btn" title="Salva" onclick="saveCatEdit(${i})">✓</button>
+    <button class="icon-btn" title="Annulla" onclick="renderCatList()">✕</button>`;
+  document.getElementById(`el-${i}`).focus();
+}
+
+function saveCatEdit(i) {
+  const label = document.getElementById(`el-${i}`).value.trim();
+  const id    = document.getElementById(`ei-${i}`).value.trim().toLowerCase().replace(/\s+/g,'_');
+  if (!label || !id) return showToast('Nome e ID obbligatori');
+  const dup = state.categories.findIndex((c,idx) => c.id === id && idx !== i);
+  if (dup !== -1) return showToast('ID già in uso');
+  state.categories[i] = { ...state.categories[i], label, id };
+  saveState();
+  newsCache = {};
+  renderCatList();
+  showToast('Categoria aggiornata ✓');
+}
+
+function removeCat(i) {
+  if (!confirm(`Rimuovere la categoria "${state.categories[i].label}"?`)) return;
+  state.categories.splice(i, 1);
+  saveState();
+  newsCache = {};
+  renderCatList();
+  renderFeedCatSelect();
+  if (currentFilter === state.categories[i]?.id) currentFilter = 'all';
+  showToast('Categoria rimossa');
+}
+
+function addCategory() {
+  const label = document.getElementById('new-cat-label').value.trim();
+  const id    = document.getElementById('new-cat-id').value.trim().toLowerCase().replace(/\s+/g,'_');
+  const color = document.getElementById('new-cat-color').value;
+  if (!label || !id) return showToast('Inserisci nome e ID');
+  if (state.categories.find(c => c.id === id)) return showToast('ID già esistente');
+  state.categories.push({ id, label, color });
+  saveState();
+  newsCache = {};
+  document.getElementById('new-cat-label').value = '';
+  document.getElementById('new-cat-id').value    = '';
+  renderCatList();
+  renderFeedCatSelect();
+  showToast(`Categoria "${label}" aggiunta ✓`);
+}
+
+// Auto-fill ID from label
+setTimeout(() => {
+  const lbl = document.getElementById('new-cat-label');
+  const iid = document.getElementById('new-cat-id');
+  if (!lbl || !iid) return;
+  lbl.addEventListener('input', () => {
+    if (!iid.dataset.manual) {
+      iid.value = lbl.value.trim().toLowerCase()
+        .replace(/[àáâ]/g,'a').replace(/[èéê]/g,'e').replace(/[ìíî]/g,'i')
+        .replace(/[òóô]/g,'o').replace(/[ùúû]/g,'u')
+        .replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'');
+    }
+  });
+  iid.addEventListener('input', () => { iid.dataset.manual = '1'; });
+}, 200);
+
+// ────────────────────────────────────────────────
+// FEEDS
+// ────────────────────────────────────────────────
+function renderFeedCatSelect() {
+  const sel = document.getElementById('new-feed-cat');
+  if (!sel) return;
+  sel.innerHTML = state.categories.map(c =>
+    `<option value="${c.id}">${c.label}</option>`
+  ).join('');
+}
+
+function renderFeedList() {
+  const list = document.getElementById('feed-list');
+  if (!state.feeds.length) {
+    list.innerHTML = `<div class="empty-state" style="padding:16px;font-size:0.85rem;font-style:italic">Nessuna fonte aggiunta. L'AI userà le sue fonti di default. Aggiungi fonti specifiche per orientare la selezione delle notizie.</div>`;
+    return;
+  }
+  list.innerHTML = state.feeds.map((f, i) => {
+    const cat = state.categories.find(c => c.id === f.cat);
+    return `
+    <div class="feed-row">
+      <div>
+        <div class="feed-name">${f.name}</div>
+        <div class="feed-url">${f.url}</div>
+        <span class="feed-cat-badge" style="background:${cat?cat.color:'#7a7060'}">${cat?cat.label:f.cat}</span>
+      </div>
+      <button class="icon-btn" title="Modifica" onclick="editFeed(${i})">✏️</button>
+      <button class="icon-btn danger" title="Rimuovi" onclick="removeFeed(${i})">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function addFeed() {
+  const name = document.getElementById('new-feed-name').value.trim();
+  const url  = document.getElementById('new-feed-url').value.trim();
+  const cat  = document.getElementById('new-feed-cat').value;
+  if (!name || !url) return showToast('Nome e URL obbligatori');
+  try { new URL(url); } catch { return showToast('URL non valido — includi https://'); }
+  state.feeds.push({ name, url, cat });
+  saveState();
+  newsCache = {};
+  document.getElementById('new-feed-name').value = '';
+  document.getElementById('new-feed-url').value  = '';
+  renderFeedList();
+  showToast(`Fonte "${name}" aggiunta ✓`);
+}
+
+function removeFeed(i) {
+  if (!confirm(`Rimuovere la fonte "${state.feeds[i].name}"?`)) return;
+  state.feeds.splice(i, 1);
+  saveState();
+  newsCache = {};
+  renderFeedList();
+  showToast('Fonte rimossa');
+}
+
+function editFeed(i) {
+  const f    = state.feeds[i];
+  const name = prompt('Nome fonte:', f.name);
+  if (name === null) return;
+  const url  = prompt('URL / feed RSS:', f.url);
+  if (url === null) return;
+  try { new URL(url.trim()); } catch { return showToast('URL non valido'); }
+  state.feeds[i].name = name.trim() || f.name;
+  state.feeds[i].url  = url.trim()  || f.url;
+  saveState();
+  newsCache = {};
+  renderFeedList();
+  showToast('Fonte aggiornata ✓');
+}
+
+// ────────────────────────────────────────────────
+// TOAST
+// ────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ────────────────────────────────────────────────
+// INIT
+// ────────────────────────────────────────────────
+renderFilters();
+switchEdition(autoDetectEdition(), false);
+</script>
+</body>
+</html>
